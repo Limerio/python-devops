@@ -1,0 +1,35 @@
+services:
+  api:
+    image: devops-monitor-api
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  dashboard:
+    image: devops-monitor-dashboard
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    depends_on:
+      api:
+        condition: service_healthy
